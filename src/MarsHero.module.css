@@ -1,0 +1,446 @@
+/* SkyFall hero. Colours from DESIGN.md.
+
+   Layers (back to front): static starfield (page background, used until the live canvas
+   is up and for good without WebGPU) < planet poster (transparent sky, inside the stage)
+   < full-bleed WebGPU canvas (its own stars everywhere) < hotspots < copy < header.
+
+   Narrow screens (< 1024 px): header, then Mars (62svh), then copy, in normal flow.
+   Desktop: Mars framed in the right two-thirds, copy in the left third (DESIGN.md),
+   logo top-left and the scan CTA top-right. */
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #05060a url("/mars-stars.webp") 0 0 / 1024px 1024px repeat;
+}
+
+.header {
+  position: relative;
+  z-index: 4;
+  order: -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px 0;
+}
+
+.stage {
+  position: relative;
+  order: 0;
+  width: 100%;
+  /* Keep in sync with POSTER_SOURCES.portraitMedia in MarsHero.tsx. */
+  height: 62vh;
+  height: 62svh;
+  flex: none;
+}
+
+.copy {
+  position: relative;
+  z-index: 3;
+  order: 1;
+  padding: 8px 20px 48px;
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    display: block;
+    height: 100vh;
+    height: 100svh;
+    min-height: 600px;
+  }
+
+  .header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 28px clamp(24px, 3.5vw, 64px) 0;
+  }
+
+  .stage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 66.6667%;
+    height: 100%;
+  }
+
+  .copy {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 33.3333%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 96px clamp(24px, 3.5vw, 64px) 48px;
+  }
+}
+
+.media,
+.hud {
+  position: absolute;
+  inset: 0;
+}
+
+.media {
+  z-index: 0;
+}
+
+.hud {
+  z-index: 2;
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The camera fov is vertical, so height-driven cover scaling keeps the poster's
+     planet the same size as the live render's. */
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+/* Full-bleed over the whole hero; Mars is framed in the stage by an off-centre camera. */
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 600ms ease-out;
+}
+
+.canvas[data-visible="true"] {
+  opacity: 1;
+}
+
+/* Reduced motion: the canvas replaces the poster instantly instead of cross-fading. */
+.hero[data-reduced-motion="true"] .canvas {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    transition: none;
+  }
+}
+
+/* --- Interactive HUD ----------------------------------------------------------------
+   Hotspots, ping readout, and the info card. Telemetry type per DESIGN.md (mono). Text
+   sits on dark translucent panels so it keeps >= 4.5:1 contrast over any part of Mars. */
+.hud {
+  pointer-events: none;
+  font-family: var(--font-mono), "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Hotspot: a small ring pinned to the scene; a 44 px invisible hit area for touch. */
+.hotspot {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 1;
+  transition: opacity 300ms ease-out;
+}
+
+.hotspot[data-visible="false"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hotspotDot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 1.5px solid #bfefff;
+  border-radius: 50%;
+  background: rgba(5, 6, 10, 0.35);
+  box-shadow: 0 0 0 3px rgba(5, 6, 10, 0.4);
+}
+
+.hotspot:hover .hotspotDot,
+.hotspot:focus-visible .hotspotDot,
+.hotspot[aria-expanded="true"] .hotspotDot {
+  background: #bfefff;
+}
+
+.hotspot:focus-visible {
+  outline: none;
+}
+
+.hotspot:focus-visible .hotspotDot {
+  outline: 2px solid var(--ice);
+  outline-offset: 4px;
+}
+
+/* Labels: always on for the ice result; others on hover / focus / after "Explore Mars". */
+.hotspotLabel {
+  position: absolute;
+  left: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #bfefff;
+  background: rgba(5, 6, 10, 0.78);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.hotspot[data-side="left"] .hotspotLabel {
+  left: auto;
+  right: 34px;
+}
+
+.hotspot[data-hotspot="ice"] .hotspotLabel,
+.hotspot:hover .hotspotLabel,
+.hotspot:focus-visible .hotspotLabel,
+.hotspot[aria-expanded="true"] .hotspotLabel,
+.hud[data-revealed="true"] .hotspotLabel {
+  opacity: 1;
+}
+
+/* While a card is open, labels step back so none shows through or beside it. */
+.hud[data-card-open="true"] .hotspotLabel {
+  opacity: 0;
+}
+
+/* "Explore Mars": every hotspot pulses once. */
+@keyframes hotspotPulse {
+  0% {
+    box-shadow: 0 0 0 3px rgba(5, 6, 10, 0.4), 0 0 0 0 rgba(191, 239, 255, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(5, 6, 10, 0.4), 0 0 0 18px rgba(191, 239, 255, 0);
+  }
+}
+
+.hud[data-revealed="true"] .hotspotDot {
+  animation: hotspotPulse 900ms ease-out 2;
+}
+
+/* Ping readout at the pinged point. */
+.ping {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+
+.ping[data-visible="true"] {
+  opacity: 1;
+}
+
+.pingLabel {
+  position: absolute;
+  left: 16px;
+  bottom: 10px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #f4f1ec;
+  background: rgba(5, 6, 10, 0.78);
+}
+
+.ping[data-side="left"] .pingLabel {
+  left: auto;
+  right: 16px;
+}
+
+.pingTag {
+  color: #a8a29a;
+}
+
+/* Info card: next to its hotspot on wide screens. */
+.card {
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: min(300px, 80%);
+  box-sizing: border-box;
+  margin: 0 0 0 30px;
+  padding: 18px 40px 16px 18px;
+  transform: translateY(-50%);
+  border-left: 2px solid var(--ice);
+  background: rgba(5, 6, 10, 0.9);
+  font-family: var(--font-body), system-ui, sans-serif;
+  text-transform: none;
+  letter-spacing: normal;
+  pointer-events: auto;
+}
+
+.card[data-side="left"] {
+  margin: 0 0 0 calc(-30px - min(300px, 80%));
+}
+
+.cardTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f4f1ec;
+}
+
+.cardTitle:focus {
+  outline: none;
+}
+
+.cardBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #d9d4cc;
+}
+
+.cardTag {
+  margin: 12px 0 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a8a29a;
+}
+
+.cardAction {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--ice);
+  background: transparent;
+  color: #bfefff;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cardClose {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: #f4f1ec;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Phones: a bottom sheet across the stage instead of an anchored card. */
+@media (max-width: 639.98px) {
+  .card,
+  .card[data-side="left"] {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    margin: 0;
+    transform: none;
+  }
+
+  .hotspotLabel {
+    font-size: 10px;
+  }
+}
+
+.labelShort {
+  display: none;
+}
+
+/* Narrow phones: no room beside the dot, so labels sit centred above it, shortened. */
+@media (max-width: 479.98px) {
+  .labelFull:has(+ .labelShort) {
+    display: none;
+  }
+
+  .labelShort {
+    display: inline;
+  }
+
+  .hotspotLabel,
+  .hotspot[data-side="left"] .hotspotLabel {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: 34px;
+    transform: translateX(-50%);
+  }
+
+  /* Aligned to the dot's visible edge (the 44 px hit area is wider than the 14 px dot). */
+  .hotspot[data-align="start"] .hotspotLabel {
+    left: 15px;
+    transform: none;
+  }
+
+  .hotspot[data-align="end"] .hotspotLabel {
+    left: auto;
+    right: 15px;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot,
+  .hotspotLabel,
+  .ping {
+    transition: none;
+  }
+
+  .hud[data-revealed="true"] .hotspotDot {
+    animation: none;
+  }
+}
+
+.hero[data-reduced-motion="true"] .hotspot,
+.hero[data-reduced-motion="true"] .hotspotLabel,
+.hero[data-reduced-motion="true"] .ping {
+  transition: none;
+}
+
+.hero[data-reduced-motion="true"] .hud[data-revealed="true"] .hotspotDot {
+  animation: none;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

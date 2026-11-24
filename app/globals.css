@@ -1,0 +1,25 @@
+/* Colours from DESIGN.md. */
+:root {
+  --space: #05060a;
+  --text: #f4f1ec;
+  --text-muted: #a8a29a;
+  --accent: #ff5a36;
+  --ice: #7fd8ff;
+  --ice-bright: #bfefff;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--space);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+:focus-visible {
+  outline: 2px solid var(--ice);
+  outline-offset: 3px;
+}

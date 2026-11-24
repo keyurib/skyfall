@@ -1,0 +1,254 @@
+/* Hero copy. Colours and type from DESIGN.md; tokens in app/globals.css.
+   Every copy block enters with a short rise, staggered 150 ms (DESIGN: 120-180 ms);
+   reduced motion shows it immediately. */
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.brand,
+.scanBlock,
+.headline,
+.subheadline,
+.actions,
+.facts,
+.hint {
+  animation: enter 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand,
+  .scanBlock,
+  .headline,
+  .subheadline,
+  .actions,
+  .facts,
+  .hint {
+    animation: none;
+  }
+}
+
+/* Header, top-left: the SkyFall wordmark with its line beside it. */
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Header, top-right: the radar status and the scan CTA side by side. row-reverse puts
+   the status visually first while the DOM keeps the button first (reading order).
+   Phones stack the status under the button: there is no room for three across. */
+.scanBlock {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 16px;
+  flex: none;
+  text-align: right;
+}
+
+@media (max-width: 559.98px) {
+  .scanBlock {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
+
+/* Phones: the wordmark's line goes under it so the scan CTA keeps its room. */
+@media (max-width: 559.98px) {
+  .brand {
+    flex-direction: column;
+  }
+}
+
+.wordmark {
+  font-family: var(--font-wordmark), var(--font-display), sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.eyebrowText {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.headline {
+  margin: 0 0 18px;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-weight: 600;
+  font-size: clamp(2.1rem, 3.4vw, 3.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.subheadline {
+  margin: 0 0 28px;
+  max-width: 36em;
+  font-size: clamp(0.98rem, 1.05vw, 1.1rem);
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+/* Radar telemetry beside the scan CTA, ruled on the edge that faces it. */
+.telemetry {
+  padding-right: 12px;
+  border-right: 2px solid rgba(127, 216, 255, 0.35);
+}
+
+.telemetry[data-phase="complete"] {
+  border-right-color: var(--ice);
+}
+
+.telemetryLine {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.telemetryNote {
+  margin: 4px 0 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hint {
+  margin: 20px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 2px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* #05060A on #FF5A36: 6.5:1. */
+.primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--space);
+}
+
+.primary:hover {
+  background: #ff7556;
+}
+
+.primary[aria-disabled="true"] {
+  cursor: progress;
+  background: transparent;
+  color: var(--text);
+}
+
+/* Solid ice cyan: ties "Explore Mars" to the cyan hotspots it reveals, and stays
+   distinct from the orange scan CTA. #05060A on #7FD8FF: ~12:1. */
+.secondary {
+  border: 1px solid var(--ice);
+  background: var(--ice);
+  color: var(--space);
+}
+
+.secondary:hover {
+  border-color: var(--ice-bright);
+  background: var(--ice-bright);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(244, 241, 236, 0.14);
+}
+
+.fact dt {
+  margin-bottom: 4px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.fact dd {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 15px;
+  color: var(--text);
+}
+
+/* Flex layout drops leading whitespace, so the arrow's gap is a margin. */
+.arrow {
+  margin-left: 0.45em;
+}
+
+/* Phones: a compact header so Mars stays high on the screen. */
+@media (max-width: 559.98px) {
+  .scanBlock {
+    gap: 6px;
+  }
+
+  .scanBlock .primary {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .wordmark {
+    font-size: 13px;
+  }
+
+  .eyebrowText {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+
+  .telemetryLine {
+    font-size: 10px;
+  }
+
+  .telemetryNote {
+    font-size: 9px;
+  }
+}

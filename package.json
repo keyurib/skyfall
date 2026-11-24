@@ -1,0 +1,41 @@
+{
+  "name": "skyfall",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "check:wgsl": "node scripts/check-wgsl.mjs",
+    "doctor": "vgpu doctor --pretty",
+    "render:m1a": "tsx scripts/render-m1a.ts",
+    "render:m1b": "tsx scripts/render-m1b.ts",
+    "render:posters": "tsx scripts/render-posters.ts",
+    "test:browser": "tsx scripts/browser-test.ts",
+    "typecheck": "tsc --noEmit",
+    "render:m2": "tsx scripts/render-m2.ts",
+    "render:m3": "tsx scripts/render-m3.ts",
+    "render:interaction": "tsx scripts/render-interaction.ts",
+    "deploy": "npm run build && npx wrangler deploy",
+    "preview": "npm run build && npx wrangler dev"
+  },
+  "dependencies": {
+    "@vgpu/wgsl": "0.6.0",
+    "@vgpu/wgsl-std": "0.6.0",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "vgpu": "0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "@types/pngjs": "6.0.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "playwright": "1.65.1",
+    "pngjs": "7.0.0",
+    "sharp": "0.35.5",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  }
+}
